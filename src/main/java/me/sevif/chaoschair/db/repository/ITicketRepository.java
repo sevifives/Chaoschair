@@ -1,9 +1,11 @@
 package me.sevif.chaoschair.db.repository;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.elasticsearch.repository.ElasticsearchCrudRepository;
+import org.springframework.stereotype.Component;
 
 import me.sevif.chaoschair.db.entity.Ticket;
 
-public interface ITicketRepository extends PagingAndSortingRepository<Ticket,Long> {
+@Component
+public interface ITicketRepository extends ElasticsearchCrudRepository<Ticket,Long> {
 
 }
