@@ -111,6 +111,10 @@ public class EntitiesController {
 				Pageable pageable
 			) throws JsonProcessingException {
 		SearchQuery searchQuery;
+		// No special tricks here - just let the power of ES take over.
+		// Strict puts almost all the URI power in the query while !strict
+		// does auto-fuzzy matching. Don't really need tests around this
+		// since it's not really a in-depth operation beyond using APIs
 		if (isStrict) {
 			searchQuery = new NativeSearchQueryBuilder()
 			    .withQuery(QueryBuilders.queryStringQuery(search))
