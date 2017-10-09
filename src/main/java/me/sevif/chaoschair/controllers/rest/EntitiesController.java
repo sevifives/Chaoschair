@@ -13,6 +13,7 @@ import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.SearchQuery;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,7 +21,6 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import me.sevif.chaoschair.db.entity.Organization;
 import me.sevif.chaoschair.db.entity.Ticket;
@@ -36,6 +36,7 @@ public class EntitiesController {
 	@Autowired private ITicketRepository ticketRepo;
 	@Autowired private IOrganizationRepository orgRepo;
 
+	// Begin wildly redundant code because of types!
 	@PostMapping(value="/rest/1.0/user", produces = "application/json")
 	public @ResponseBody String createUser(@RequestBody User user) throws JSONException {
 		User ret = userRepo.save(user);
@@ -101,28 +102,11 @@ public class EntitiesController {
 	
 	@Autowired
 	private ElasticsearchTemplate elasticsearchTemplate;
-	
-	@GetMapping(value="/rest/1.0/search", produces = "application/json") 
-	public Object search(
+
+	@GetMapping(value="/rest/1.0/search/{entityType}", produces = "application/json") 
+	public @ResponseBody Page<Object> searchOrganization(
 				@RequestParam(name="q", required=false) String search,
-				Pageable pageable
-			) {
-		
-		
-		SearchQuery searchQuery = new NativeSearchQueryBuilder()
-			    .withQuery(QueryBuilders.matchAllQuery())
-			    .withIndices("organization")
-			    .withPageable(pageable)
-			    .build();
-		
-		return elasticsearchTemplate.queryForPage(searchQuery, Object.class);
-	}
-	
-	private ObjectMapper objectMapper = new ObjectMapper();
-	
-	@GetMapping(value="/rest/1.0/search/organizations", produces = "application/json") 
-	public @ResponseBody Page<Organization> searchOrganization(
-				@RequestParam(name="q", required=false) String search,
+				@PathVariable(name="entityType", required=true) String ent,
 				Pageable pageable
 			) throws JsonProcessingException {
 		SearchQuery searchQuery = new NativeSearchQueryBuilder()
@@ -130,38 +114,19 @@ public class EntitiesController {
 			    .withPageable(pageable)
 			    .build();
 		
-		AggregatedPage<Organization> ret = elasticsearchTemplate.queryForPage(searchQuery, Organization.class);
+		AggregatedPage ret;
 		
-		return new PageImpl<Organization>(ret.getContent(), pageable, ret.getTotalElements());
+		if (ent.equalsIgnoreCase("organizations")) {
+			ret = elasticsearchTemplate.queryForPage(searchQuery, Organization.class);
+		} else if (ent.equalsIgnoreCase("tickets")) {
+			ret = elasticsearchTemplate.queryForPage(searchQuery, Ticket.class);
+		} else if (ent.equalsIgnoreCase("users")) {
+			ret = elasticsearchTemplate.queryForPage(searchQuery, User.class);
+		} else {
+			throw new NoClassDefFoundError();
+		}
+		
+		return new PageImpl<Object>(ret.getContent(), pageable, ret.getTotalElements());
 	}
 	
-	@GetMapping(value="/rest/1.0/search/tickets", produces = "application/json") 
-	public @ResponseBody Page<Ticket> searchTickets(
-				@RequestParam(name="q", required=false) String search,
-				Pageable pageable
-			) throws JsonProcessingException {
-		SearchQuery searchQuery = new NativeSearchQueryBuilder()
-				.withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
-			    .withPageable(pageable)
-			    .build();
-		
-		AggregatedPage<Ticket> ret = elasticsearchTemplate.queryForPage(searchQuery, Ticket.class);
-		
-		return new PageImpl<Ticket>(ret.getContent(), pageable, ret.getTotalElements());
-	}
-	
-	@GetMapping(value="/rest/1.0/search/users", produces = "application/json") 
-	public @ResponseBody Page<User> searchUsers(
-				@RequestParam(name="q", required=false) String search,
-				Pageable pageable
-			) throws JsonProcessingException {
-		SearchQuery searchQuery = new NativeSearchQueryBuilder()
-				.withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
-			    .withPageable(pageable)
-			    .build();
-		
-		AggregatedPage<User> ret = elasticsearchTemplate.queryForPage(searchQuery, User.class);
-		
-		return new PageImpl<User>(ret.getContent(), pageable, ret.getTotalElements());
-	}
 }
