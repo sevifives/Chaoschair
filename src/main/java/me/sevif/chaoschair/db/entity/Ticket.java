@@ -200,12 +200,20 @@ public class Ticket {
 		return tags;
 	}
 	
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
-	
-	@JsonProperty(value="tags", access=Access.WRITE_ONLY)
-	public void setRawTags(List<String> tags) {
-		this.tags = tags.stream().map(x -> new Tag(x)).collect(Collectors.toList());
+	@JsonProperty(value="tags")
+	public void setTags(List<Object> tags) {
+		Object i = tags.get(0);
+		if (i instanceof Tag) {
+			this.tags = tags.stream().map(x -> (Tag) x).collect(Collectors.toList());
+		} else if (i instanceof java.util.LinkedHashMap) {
+			
+			this.tags = tags.stream().map((x) -> {
+				java.util.LinkedHashMap r = (java.util.LinkedHashMap) x;
+				
+				return new Tag((String) r.get("tag"));
+			}).collect(Collectors.toList());
+		} else if (i instanceof String) {
+			this.tags = tags.stream().map(x -> new Tag((String) x)).collect(Collectors.toList());
+		}
 	}
 }
