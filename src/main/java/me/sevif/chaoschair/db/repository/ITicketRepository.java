@@ -6,6 +6,5 @@ import org.springframework.stereotype.Component;
 import me.sevif.chaoschair.db.entity.Ticket;
 
 @Component
-public interface ITicketRepository extends ElasticsearchCrudRepository<Ticket,Long> {
-
+public interface ITicketRepository extends ElasticsearchCrudRepository<Ticket,String> {
 }

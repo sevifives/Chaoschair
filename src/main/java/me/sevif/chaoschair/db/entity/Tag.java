@@ -1,18 +1,23 @@
 package me.sevif.chaoschair.db.entity;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.springframework.data.annotation.Id;
-
-import me.sevif.chaoschair.db.entity.enums.PrincipalType;
-
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Tag {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
 	
+	@JsonProperty("tag")
+	private String tag;
 	
-	private String name;
-	private PrincipalType principalType;
+	public Tag(@JsonProperty("tag") String tag) {
+		this.tag = tag;
+	}
+	
+	public String getTag() {
+		return this.tag;
+	}
+	
+	public void setTag(String tag) {
+		this.tag = tag;
+	}
 }

@@ -1,7 +1,9 @@
 package me.sevif.chaoschair.db.entity;
 
+
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -9,65 +11,82 @@ import javax.persistence.GenerationType;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-@Document(indexName="ticket")
+@Document(indexName="ticket",createIndex=true)
 public class Ticket {
 
 	public static enum Type {
-		PROBLEM, INCIDENT, QUESTION, TASK;
+		problem, incident, question, task;
 	}
 	
 	public static enum Priority {
-		LOW, NORMAL, HIGH, URGENT;
+		low, normal, high, urgent;
 	}
 	
 	public static enum Status {
-		OPEN, CLOSED, PENDING, HOLD, SOLVED;
+		open, closed, pending, hold, solved;
 	}
 	
 	public static enum ViaProtocol {
-		VOICE, CHAT, WEB;
+		voice, chat, web;
 	}
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@JsonProperty("_id")
-	private Long id;
-
+	@Field(type = FieldType.String, store = true)
+	private String id;
+	
 	private String url;
+	
+	@JsonProperty("external_id")
 	private String externalUuid;
 	
 	private Type type;
 	private Status status;
 	private Priority priority;
+	
+	@JsonProperty("via")
 	private ViaProtocol viaProtocol;
 	
+	@JsonProperty("submitter_id")
 	private Long submitterId;
+	
+	@JsonProperty("assignee_id")
 	private Long assigneeId;
+	
+	@JsonProperty("organization_id")
 	private Long organizationId;
 	
 	private boolean hasIncidents;
+	
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss XXX")
+	@JsonProperty("due_at")
 	private Date dueAt;
 	
 	private String subject;
 	private String description;
 	
-	// transient
 	@Transient
 	private Organization organization;
 	
-	@Transient
 	private List<Tag> tags;
-
-	public Long getId() {
-		return id;
+	
+	@JsonProperty("id")
+	public String getId() {
+		return this.id;
 	}
-
-	public void setId(Long id) {
+	
+	@JsonProperty("_id")
+	public void setId(String id) {
 		this.id = id;
 	}
+	
 
 	public String getUrl() {
 		return url;
@@ -179,5 +198,14 @@ public class Ticket {
 
 	public List<Tag> getTags() {
 		return tags;
+	}
+	
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+	
+	@JsonProperty(value="tags", access=Access.WRITE_ONLY)
+	public void setRawTags(List<String> tags) {
+		this.tags = tags.stream().map(x -> new Tag(x)).collect(Collectors.toList());
 	}
 }

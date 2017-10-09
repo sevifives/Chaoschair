@@ -1,47 +1,19 @@
 package me.sevif.chaoschair.db.entity;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class DomainName {
-	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long id;
+	private String domainName;
 	
-	private Long organizationId;
-	private String protocol = "https";
+	public DomainName(@JsonProperty("domainName") String domainName) {
+		this.domainName = domainName;
+	}
 	
-	@Transient
-	private Organization organization;
-
-	public Long getId() {
-		return id;
+	public String getDomainName() {
+		return this.domainName;
 	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
-
-	public Organization getOrganization() {
-		return organization;
+	
+	public void setDomainName(String domainName) {
+		this.domainName = domainName;
 	}
 }

@@ -1,26 +1,38 @@
+
 package me.sevif.chaoschair.db.entity;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import javax.persistence.Column;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
 
 import org.springframework.data.annotation.Id;
-import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
+import org.springframework.data.elasticsearch.annotations.Field;
+import org.springframework.data.elasticsearch.annotations.FieldType;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 
-@Document(indexName="user")
+@Document(indexName="user_")
 public class User {
+	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@JsonProperty("_id")
+	@Field(type = FieldType.String, store = true)
 	private Long id;
 	
 	private String url;
-	private String externalId;
+	
+	@JsonProperty("external_id")
+	private String externalUuid;
+	
 	private String name;
 	private String alias;
 
@@ -36,23 +48,31 @@ public class User {
 	private String locale;
 	private String timezone;
 	
+	@JsonProperty("last_login_at")
+	@Temporal(value=TemporalType.TIMESTAMP)
+	//"2013-08-04T01:03:27 -10:00"
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss XXX")
 	private Date lastLoginAt;
+	
+	@JsonProperty("created_at")
+	@Temporal(value=TemporalType.TIMESTAMP)
+	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss XXX")
 	private Date createdAt;
 	
 	// actual associations
+	@JsonProperty("organization_id")
 	private Long organizationId;
 	
-	// transient associations
-	@Transient
 	private List<Tag> tags;
 	
-	@Transient
 	private Role role;
 
+	@JsonProperty("id")
 	public Long getId() {
 		return id;
 	}
 
+	@JsonProperty("_id")
 	public void setId(Long id) {
 		this.id = id;
 	}
@@ -65,12 +85,12 @@ public class User {
 		this.url = url;
 	}
 
-	public String getExternalId() {
-		return externalId;
+	public String getExternalUuid() {
+		return externalUuid;
 	}
 
-	public void setExternalId(String externalId) {
-		this.externalId = externalId;
+	public void setExternalId(String externalUuid) {
+		this.externalUuid = externalUuid;
 	}
 
 	public String getName() {
@@ -195,6 +215,15 @@ public class User {
 
 	public List<Tag> getTags() {
 		return tags;
+	}
+	
+	public void setTags(List<Tag> tags) {
+		this.tags = tags;
+	}
+	
+	@JsonProperty(value="tags", access=Access.WRITE_ONLY)
+	public void setRawTags(List<String> tags) {
+		this.tags = tags.stream().map(x -> new Tag(x)).collect(Collectors.toList());
 	}
 	
 }
