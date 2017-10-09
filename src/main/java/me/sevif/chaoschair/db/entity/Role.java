@@ -1,11 +1,15 @@
 package me.sevif.chaoschair.db.entity;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 public class Role {
 	
-	public Role(String name) {
+	
+	public Role(@JsonProperty("name") String name) {
 		this.name = name;
 	}
 	
+	@JsonProperty("name")
 	private String name;
 	
 	public String getName() {

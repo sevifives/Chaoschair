@@ -5,14 +5,18 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @Document(indexName="user_")
 public class User {
@@ -222,5 +226,12 @@ public class User {
 		} else if (i instanceof String) {
 			this.tags = tags.stream().map(x -> new Tag((String) x)).collect(Collectors.toList());
 		}
+	}
+	
+
+	private static ObjectMapper mapper = new ObjectMapper();
+	@Transient
+	public String asJson() throws JsonProcessingException, JSONException {
+		return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(this);
 	}
 }
