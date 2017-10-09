@@ -4,10 +4,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.ElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.aggregation.AggregatedPage;
@@ -121,30 +124,48 @@ public class EntitiesController {
 	
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
-	@GetMapping(value="/rest/1.0/search/organization", produces = "application/json") 
-	public @ResponseBody Object searchOrganization(
+	@GetMapping(value="/rest/1.0/search/organizations", produces = "application/json") 
+	public @ResponseBody Page<Organization> searchOrganization(
 				@RequestParam(name="q", required=false) String search,
 				Pageable pageable
 			) throws JsonProcessingException {
-		// turns out there's a massive bug here making this impossible to do without
-		// a crap-ton of hacks
 		SearchQuery searchQuery = new NativeSearchQueryBuilder()
-			    .withQuery(QueryBuilders.matchAllQuery())
+			    .withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
 			    .withPageable(pageable)
 			    .build();
 		
 		AggregatedPage<Organization> ret = elasticsearchTemplate.queryForPage(searchQuery, Organization.class);
 		
-		// ... so now I have to be inefficient and drop the paging...		
-		Iterator<Organization> iter = ret.iterator();
-		List<Organization> retList = new ArrayList<Organization>();
+		return new PageImpl<Organization>(ret.getContent(), pageable, ret.getTotalElements());
+	}
+	
+	@GetMapping(value="/rest/1.0/search/tickets", produces = "application/json") 
+	public @ResponseBody Page<Ticket> searchTickets(
+				@RequestParam(name="q", required=false) String search,
+				Pageable pageable
+			) throws JsonProcessingException {
+		SearchQuery searchQuery = new NativeSearchQueryBuilder()
+				.withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
+			    .withPageable(pageable)
+			    .build();
 		
-		while(iter.hasNext()) {
-			retList.add(iter.next());
-		}
+		AggregatedPage<Ticket> ret = elasticsearchTemplate.queryForPage(searchQuery, Ticket.class);
 		
+		return new PageImpl<Ticket>(ret.getContent(), pageable, ret.getTotalElements());
+	}
+	
+	@GetMapping(value="/rest/1.0/search/users", produces = "application/json") 
+	public @ResponseBody Page<User> searchUsers(
+				@RequestParam(name="q", required=false) String search,
+				Pageable pageable
+			) throws JsonProcessingException {
+		SearchQuery searchQuery = new NativeSearchQueryBuilder()
+				.withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
+			    .withPageable(pageable)
+			    .build();
 		
+		AggregatedPage<User> ret = elasticsearchTemplate.queryForPage(searchQuery, User.class);
 		
-		return retList;
+		return new PageImpl<User>(ret.getContent(), pageable, ret.getTotalElements());
 	}
 }
