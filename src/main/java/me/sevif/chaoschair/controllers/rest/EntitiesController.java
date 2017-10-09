@@ -107,12 +107,21 @@ public class EntitiesController {
 	public @ResponseBody Page<Object> searchOrganization(
 				@RequestParam(name="q", required=false) String search,
 				@PathVariable(name="entityType", required=true) String ent,
+				@RequestParam(name="strict", defaultValue="false") boolean isStrict,
 				Pageable pageable
 			) throws JsonProcessingException {
-		SearchQuery searchQuery = new NativeSearchQueryBuilder()
+		SearchQuery searchQuery;
+		if (isStrict) {
+			searchQuery = new NativeSearchQueryBuilder()
+			    .withQuery(QueryBuilders.queryStringQuery(search))
+			    .withPageable(pageable)
+			    .build();
+		} else {
+			searchQuery = new NativeSearchQueryBuilder()
 			    .withQuery(QueryBuilders.multiMatchQuery(search, "_all").fuzziness(Fuzziness.AUTO))
 			    .withPageable(pageable)
 			    .build();
+		}
 		
 		AggregatedPage ret;
 		
@@ -128,5 +137,7 @@ public class EntitiesController {
 		
 		return new PageImpl<Object>(ret.getContent(), pageable, ret.getTotalElements());
 	}
+	
+	
 	
 }
