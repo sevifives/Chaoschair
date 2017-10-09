@@ -5,9 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Transient;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -38,7 +35,6 @@ public class Ticket {
 	}
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Field(type = FieldType.String, store = true)
 	private String id;
 	

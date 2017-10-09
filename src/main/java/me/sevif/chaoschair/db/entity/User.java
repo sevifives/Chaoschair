@@ -5,12 +5,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.Column;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
@@ -24,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 public class User {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Field(type = FieldType.String, store = true)
 	private Long id;
 	
@@ -49,13 +42,10 @@ public class User {
 	private String timezone;
 	
 	@JsonProperty("last_login_at")
-	@Temporal(value=TemporalType.TIMESTAMP)
-	//"2013-08-04T01:03:27 -10:00"
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss XXX")
 	private Date lastLoginAt;
 	
 	@JsonProperty("created_at")
-	@Temporal(value=TemporalType.TIMESTAMP)
 	@JsonFormat(pattern="yyyy-MM-dd'T'HH:mm:ss XXX")
 	private Date createdAt;
 	

@@ -4,8 +4,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -21,7 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty.Access;
 public class Organization {
 	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
 	@Field(type = FieldType.String, store = true)
 	private Long id;
 	
