@@ -35,16 +35,13 @@ public class Organization {
 	
 	private Date createdAt;
 	
-	@JsonProperty("domain_names")
+	@JsonProperty("domainNames")
 	private List<DomainName> domainNames;
 	
 	@JsonProperty("shared_tickets")
 	private boolean sharedTickets;
 	
-	
-	@JsonProperty("tags")
 	private List<Tag> tags;
-
 	
 	@JsonProperty("id")
 	public Long getId() {
@@ -96,11 +93,28 @@ public class Organization {
 		this.createdAt = createdAt;
 	}
 
-	@JsonProperty("domain_names")
 	public List<DomainName> getDomainNames() {
 		return this.domainNames;
 	}
 
+	@JsonProperty(value="tags")
+	public void setTags(List<Object> tags) {
+		Object i = tags.get(0);
+		if (i instanceof Tag) {
+			this.tags = tags.stream().map(x -> (Tag) x).collect(Collectors.toList());
+		} else if (i instanceof java.util.LinkedHashMap) {
+			
+			this.tags = tags.stream().map((x) -> {
+				java.util.LinkedHashMap r = (java.util.LinkedHashMap) x;
+				
+				return new Tag((String) r.get("tag"));
+			}).collect(Collectors.toList());
+		} else if (i instanceof String) {
+			this.tags = tags.stream().map(x -> new Tag((String) x)).collect(Collectors.toList());
+		}
+	}
+
+	
 	public List<Tag> getTags() {
 		return tags;
 	}
@@ -110,19 +124,11 @@ public class Organization {
 		this.domainNames = domainNames.stream().map(x -> new DomainName(x)).collect(Collectors.toList());
 	}
 	
+	@JsonProperty(value="domainNames")
 	public void setDomainNames(List<DomainName> domainNames) {
 		this.domainNames = domainNames;
 	}
-
-	@JsonProperty(value="tags", access=Access.WRITE_ONLY)
-	public void setRawTags(List<String> tags) {
-		this.tags = tags.stream().map(x -> new Tag(x)).collect(Collectors.toList());
-	}
 	
-	public void setTags(List<Tag> tags) {
-		this.tags = tags;
-	}
-
 	public boolean isSharedTickets() {
 		return sharedTickets;
 	}

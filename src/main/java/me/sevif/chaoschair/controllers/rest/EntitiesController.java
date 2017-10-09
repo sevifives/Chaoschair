@@ -122,7 +122,7 @@ public class EntitiesController {
 	private ObjectMapper objectMapper = new ObjectMapper();
 	
 	@GetMapping(value="/rest/1.0/search/organization", produces = "application/json") 
-	public List<Organization> searchOrganization(
+	public @ResponseBody Object searchOrganization(
 				@RequestParam(name="q", required=false) String search,
 				Pageable pageable
 			) throws JsonProcessingException {
@@ -142,6 +142,8 @@ public class EntitiesController {
 		while(iter.hasNext()) {
 			retList.add(iter.next());
 		}
+		
+		
 		
 		return retList;
 	}
