@@ -1,9 +1,5 @@
 package me.sevif.chaoschair.controllers.rest;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-
 import org.elasticsearch.common.unit.Fuzziness;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.json.JSONException;
